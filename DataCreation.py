@@ -2,6 +2,9 @@ import pymysql
 from datetime import datetime
 import random
 import pandas as pd
+
+#mariadb -u root -p -h localhost
+
 #Select database
 #USE homemanager;
 
@@ -12,7 +15,8 @@ import pandas as pd
 #TRUNCATE TABLE home;
 
 # Order by month and hour, shows 20 top
-#SELECT * FROM home  ORDER BY `month`, `hour` LIMIT 20;
+#SELECT * FROM home ORDER BY year, month, day, hour LIMIT 20;
+
 
 #Display nr of rows
 #SELECT COUNT(*) from home;
@@ -253,7 +257,7 @@ connection.commit()
 
 print(f"Inserted {cursor.rowcount} row(s) into the database.")
 
-query = "SELECT * FROM home ORDER BY `month`, `hour`"
+query = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
 
 all_data_df = pd.read_sql(query, connection)
 
