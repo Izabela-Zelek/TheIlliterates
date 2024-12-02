@@ -1,0 +1,16 @@
+#mariadb -u root -p -h localhost
+
+#Select database
+#USE homemanager;
+
+#Shows structure of table
+#DESCRIBE home;
+
+#removes all data
+#TRUNCATE TABLE home;
+
+# Order by month and hour, shows 20 top
+#SELECT * FROM home ORDER BY year, month, day, hour LIMIT 20;
+
+#Display nr of rows
+#SELECT COUNT(*) from home;

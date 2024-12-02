@@ -17,7 +17,6 @@ import pandas as pd
 # Order by month and hour, shows 20 top
 #SELECT * FROM home ORDER BY year, month, day, hour LIMIT 20;
 
-
 #Display nr of rows
 #SELECT COUNT(*) from home;
 

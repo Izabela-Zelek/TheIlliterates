@@ -4,12 +4,12 @@ from time import sleep
 
 sense = SenseHat()
 value = random.randint(0,2)
-
+value = 0
 R = (238, 37, 10)
 O = (238, 141, 10) 
 Y = (238, 210, 10)
 W = (255, 255, 255)
-G =(95, 130, 22)
+G =(9, 91, 11)
 L = (33, 232, 60 )
 B = (0,0,0)
 C = (33, 226, 232 )
@@ -28,7 +28,7 @@ try:
                  B, R, R, B, B, R, B, B,
             ]
             sense.set_pixels(pixels)
-            sleep(0.5)
+            sleep(0.2)
             pixels = [
                  B, B, B, R, R, B, B, B,
                  B, B, B, R, O, R, B, O,
@@ -40,13 +40,133 @@ try:
                  B, R, R, B, B, R, B, B,
             ]
             sense.set_pixels(pixels)
-            sleep(0.5)
+            sleep(0.2)
 
             sense.clear()
             
         if value == 1:
-            sense.show_message("Gas", scroll_speed = 0.1,text_colour=L)
-            
+            #sense.show_message("Gas", scroll_speed = 0.1,text_colour=L)
+            pixels = [
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, B, B, B, G, G, L, L,
+                 B, B, B, B, B, G, G, G,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 B, B, B, B, G, L, L, W,
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 B, G, B, B, G, G, L, L,
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 B, G, B, B, B, G, G, G,
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 L, L, G, B, B, B, B, B,
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            pixels = [
+                 L, L, W, B, B, B, B, B,
+                 L, L, W, L, B, B, B, B,
+                 G, L, L, L, B, B, G, B,
+                 G, G, G, B, B, B, G, B,
+                 B, B, B, B, B, L, L, G,
+                 B, B, B, B, B, L, L, W,
+                 B, B, B, B, G, L, L, W,
+                 B, B, B, B, G, G, L, L,
+            ]
+            sense.set_pixels(pixels)
+            sleep(0.1)
+            sense.clear()
         if value == 2:
             pixels = [
                  C, C, W, C, B, B, B, B,
@@ -59,7 +179,7 @@ try:
                  B, B, B, B, B, N, N, N,
             ]
             sense.set_pixels(pixels)
-            sleep(0.1)
+            sleep(100)
             pixels = [
                  C, C, W, B, B, B, B, B,
                  C, C, W, C, B, B, B, B,
