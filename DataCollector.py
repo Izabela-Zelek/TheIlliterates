@@ -32,7 +32,7 @@ def calculate_sample_light(month, hour):
         if 18 <= hour <= 22:
             light = random.randint(300,600)
         else:
-            light = random.int(0,300)
+            light = random.randint(0,300)
     return light
 
 def fire_animation():
