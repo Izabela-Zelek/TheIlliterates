@@ -5,6 +5,7 @@ import random
 from datetime import datetime
 import json
 
+#Due to a lack of light sensor, data is randomly generated based on month and hour
 def calculate_sample_light(month, hour):
     light = 0;
     if 2 <= month <= 4:
@@ -35,6 +36,7 @@ def calculate_sample_light(month, hour):
             light = random.randint(0,300)
     return light
 
+#Defines a fire animation which runs when fire detected
 def fire_animation():
     for i in range(1, 11): 
         pixels = [
@@ -64,6 +66,7 @@ def fire_animation():
 
         sense.clear()
 
+#Defines a gas animation which runs when fire detected
 def gas_animation():
     for i in range(1, 11):
         pixels = [
@@ -214,8 +217,8 @@ def save_data():
     user = "Default"
     temp = sense.get_temperature()
     calcTemp = 0.0071*temp*temp+0.86*temp-10.0
-    gasDetect = 1;
-    fireDetect = 0;
+    gasDetect = 0;
+    fireDetect = 1;
     current = datetime.now()
     currentMonth = current.month
     currentHour = current.hour
@@ -270,7 +273,7 @@ def main():
                 else:
                     fire_animation()
                     gas_animation()
-            time.sleep(3600)
+            time.sleep(900)
     except KeyboardInterrupt:
         sense.clear()
         print("Bye bye")

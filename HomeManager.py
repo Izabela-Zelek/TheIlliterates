@@ -45,7 +45,7 @@ def on_message(client, userdata, msg):
         """
         cursor.execute(insert_query, values)
         connection.commit()
-        #print(f"Inserted {cursor.rowcount} row(s) into the database.")
+        print(f"Inserted {cursor.rowcount} row(s) into the database.")
         #print(f"Received context: {context_message}")
         cursor.close()
         connection.close()
@@ -68,7 +68,7 @@ def on_message(client, userdata, msg):
             body = f"Fire and Gas detected at {time.strftime('%H:%M')} on {time.strftime('%d/%m/%y')}"
         msg.set_content(body)
         server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        server.starttls() #Sends securely with tls
         server.login(from_email_addr, from_email_pass)
         server.send_message(msg)
         server.quit()
@@ -79,7 +79,14 @@ def on_message(client, userdata, msg):
 def dashJohn():
     connection = get_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
-
+    
+    #Used in graphs to show in ascending order
+    ascquery = "SELECT * FROM home ORDER BY year, month, day, hour"
+    cursor.execute(ascquery)
+    fullData = cursor.fetchall()
+    monthly_averages = calculate_monthly_averages(fullData)
+    
+    #Used to fetch
     recentquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(recentquery)
     recent = cursor.fetchall()
@@ -90,7 +97,8 @@ def dashJohn():
     else:
         recent = None  
     
-    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR fireDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    #Only grabs data with alerts
+    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR gasDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(alertquery)
     alerts = cursor.fetchall()
     
@@ -99,12 +107,13 @@ def dashJohn():
     current_month = 11
     current_day = 30
     
+    #Grabs data from specific day
     generalquery = "SELECT * FROM home WHERE year = %s AND month = %s AND day = %s ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(generalquery, (current_year, current_month, current_day))
     general = cursor.fetchall()    
     cursor.close()
     connection.close()
-    return render_template('index.html', alerts = alerts, recent = recent, general = general)
+    return render_template('index.html', alerts = alerts, recent = recent, general = general, monthly_averages = monthly_averages)
 
 
 @app.route('/dataJohn')
@@ -126,10 +135,12 @@ def dataJohn():
     else:
         recent = None
         
+    #Grabs a limited amount of data for specific user, used to lessen load on webapp
     generalquery = "SELECT * FROM home WHERE user = %s ORDER BY year DESC, month DESC, day DESC, hour DESC LIMIT %s OFFSET %s"
     cursor.execute(generalquery, ("John", DataPerPage, offset))
     general = cursor.fetchall()
     
+    #Grabs data from specific user
     count_query = "SELECT COUNT(*) as total FROM home WHERE user = %s"
     cursor.execute(count_query, ("John"))
     totalData = cursor.fetchone()['total']
@@ -143,7 +154,12 @@ def dataJohn():
 def dashJane():
     connection = get_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
-
+    
+    ascquery = "SELECT * FROM home ORDER BY year, month, day, hour"
+    cursor.execute(ascquery)
+    fullData = cursor.fetchall()
+    monthly_averages = calculate_monthly_averages(fullData)
+    
     recentquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(recentquery)
     recent = cursor.fetchall()
@@ -154,7 +170,7 @@ def dashJane():
     else:
         recent = None  
     
-    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR fireDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR gasDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(alertquery)
     alerts = cursor.fetchall()
     
@@ -168,7 +184,7 @@ def dashJane():
     general = cursor.fetchall()    
     cursor.close()
     connection.close()
-    return render_template('indexJane.html', alerts = alerts, recent = recent, general = general)
+    return render_template('indexJane.html', alerts = alerts, recent = recent, general = general, monthly_averages = monthly_averages)
 
 
 @app.route('/dataJane')
@@ -207,6 +223,44 @@ def dataJane():
 def index():
     return redirect(url_for('dashJohn'))
 
+#Calculates average values for each month and year
+def calculate_monthly_averages(data):
+    monthly_data = {} #Defines a dictionary
+
+    for entry in data:
+        year = entry.get('year')
+        month = entry.get('month')
+
+        
+        if year not in monthly_data:
+            monthly_data[year] = {}
+        if month not in monthly_data[year]:
+            monthly_data[year][month] = {
+                'temp': [],
+                'humidity': [],
+                'pressure': [],
+                'lightLevel': []
+            }
+        monthly_data[year][month]['temp'].append(entry['temp'])
+        monthly_data[year][month]['humidity'].append(entry['humidity'])
+        monthly_data[year][month]['pressure'].append(entry['pressure'])
+        monthly_data[year][month]['lightLevel'].append(entry['lightLevel'])
+        
+    #With the help of ChatGPT as was confused on how to handle work with dictionaries       
+    averages = []
+    for year, months in monthly_data.items():
+        for month, values in months.items():
+            averages.append({
+                'year': year,
+                'month': month,
+                'temp': sum(values['temp']) / len(values['temp']) if values['temp'] else 0,
+                'humidity': sum(values['humidity']) / len(values['humidity']) if values['humidity'] else 0,
+                'pressure': sum(values['pressure']) / len(values['pressure']) if values['pressure'] else 0,
+                'lightLevel': sum(values['lightLevel']) / len(values['lightLevel']) if values['lightLevel'] else 0,
+            })
+
+    return averages
+
 
 def mqtt_client():
     mqtt_client = mqtt.Client()
@@ -220,7 +274,7 @@ def mqtt_client():
 def flask_app():
     app.run(debug=True, host='0.0.0.0')
 
-
+#Starts mqtt on separate thread to avoid mqtt and flask clashing
 def main():
     mqtt_thread = threading.Thread(target=mqtt_client)
     mqtt_thread.daemon = True

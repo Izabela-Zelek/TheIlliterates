@@ -1,7 +1,9 @@
+//Template taken from w3schools https://www.w3schools.com/w3css/tryit.asp?filename=tryw3css_templates_analytics&stacked=h
 <!DOCTYPE html>
 <html>
 <head>
-<title>W3.CSS Template</title>
+<title>Home Management</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -14,6 +16,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     max-height: 300px;
     overflow-y: scroll;
 }
+
 </style>
 </head>
 <body class="w3-light-grey">
@@ -44,9 +47,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <div class="w3-bar-block">
     <a href="#" class="w3-bar-item w3-button w3-padding-16 w3-hide-large w3-dark-grey w3-hover-black" onclick="w3_close()" title="close menu"><i class="fa fa-remove fa-fw"></i>  Close Menu</a>
     <a href="#" class="w3-bar-item w3-button w3-padding w3-blue"><i class="fa fa-users fa-fw"></i>  Dashboard</a>
-    <a href="#" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Preferences</a>
-    <a href="/dataJohn" class="w3-bar-item w3-button w3-padding"><i class="fa fa-users fa-fw"></i>  Data</a>
-    <a href="#" class="w3-bar-item w3-button w3-padding"><i class="fa fa-cog fa-fw"></i>  Settings</a><br><br>
+    <a href="/dataJohn" class="w3-bar-item w3-button w3-padding"><i class="fa fa-eye fa-fw"></i>  Data</a>
   </div>
 </nav>
 
@@ -201,7 +202,25 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </div>
 <hr>
 
-  <!-- End page content -->
+<div class="w3-container">
+        <h2>Monthly Average Values</h2>
+        <div class="w3-container">
+            <h3>Temperature</h3>
+            <canvas id="tempChart"></canvas>
+        </div>
+        <div class="w3-container">
+            <h3>Humidity</h3>
+            <canvas id="humidityChart"></canvas>
+        </div>
+        <div class="w3-container">
+            <h3>Pressure</h3>
+            <canvas id="pressureChart"></canvas>
+        </div>
+        <div class="w3-container">
+            <h3>Light Level</h3>
+            <canvas id="lightChart"></canvas>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -227,6 +246,47 @@ function w3_close() {
   mySidebar.style.display = "none";
   overlayBg.style.display = "none";
 }
+
+// Code from ChatGPT due to unfamiliarity with Chart.js
+    const monthlyAverages = {{ monthly_averages | tojson }};
+    
+    // Prepare data for graphs
+    const labels = monthlyAverages.map(entry => `${entry.month}/${entry.year}`);
+    const tempData = monthlyAverages.map(entry => entry.temp);
+    const humidityData = monthlyAverages.map(entry => entry.humidity);
+    const pressureData = monthlyAverages.map(entry => entry.pressure);
+    const lightData = monthlyAverages.map(entry => entry.lightLevel);
+
+    // Create Chart.js graphs
+    const createGraph = (ctx, label, data, color) => {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: `${color}33`,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Month/Year' } },
+                    y: { title: { display: true, text: label } }
+                }
+            }
+        });
+    };
+
+    // Render graphs
+    createGraph(document.getElementById('tempChart').getContext('2d'), 'Temperature (°C)', tempData, 'red');
+    createGraph(document.getElementById('humidityChart').getContext('2d'), 'Humidity (%)', humidityData, 'blue');
+    createGraph(document.getElementById('pressureChart').getContext('2d'), 'Pressure (hPa)', pressureData, 'green');
+    createGraph(document.getElementById('lightChart').getContext('2d'), 'Light Level (Lux)', lightData, 'orange');
+
 </script>
 
 </body>
