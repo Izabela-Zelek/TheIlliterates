@@ -4,7 +4,7 @@ import json
 import smtplib
 from email.message import EmailMessage
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, request
 import threading
 
 from_email_addr ="theilliteratespi@gmail.com"
@@ -43,8 +43,8 @@ def on_message(client, userdata, msg):
         INSERT INTO home (user, temp, gasDetect, fireDetect, lightLevel, humidity, pressure, month, hour, day, year) 
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        #cursor.execute(insert_query, values)
-        #connection.commit()
+        cursor.execute(insert_query, values)
+        connection.commit()
         #print(f"Inserted {cursor.rowcount} row(s) into the database.")
         #print(f"Received context: {context_message}")
         cursor.close()
@@ -75,8 +75,8 @@ def on_message(client, userdata, msg):
         connection.close()
     
 
-@app.route('/')
-def index():
+@app.route('/dashboardJohn')
+def dashJohn():
     connection = get_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -90,7 +90,7 @@ def index():
     else:
         recent = None  
     
-    alertquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR fireDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
     cursor.execute(alertquery)
     alerts = cursor.fetchall()
     
@@ -107,8 +107,12 @@ def index():
     return render_template('index.html', alerts = alerts, recent = recent, general = general)
 
 
-@app.route('/data')
-def data():
+@app.route('/dataJohn')
+def dataJohn():
+    page = int(request.args.get('page', 1)) 
+    DataPerPage = 100
+    offset = (page - 1) * DataPerPage
+    
     connection = get_db()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
     
@@ -122,12 +126,87 @@ def data():
     else:
         recent = None
         
-    generalquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
-    cursor.execute(generalquery)
+    generalquery = "SELECT * FROM home WHERE user = %s ORDER BY year DESC, month DESC, day DESC, hour DESC LIMIT %s OFFSET %s"
+    cursor.execute(generalquery, ("John", DataPerPage, offset))
     general = cursor.fetchall()
+    
+    count_query = "SELECT COUNT(*) as total FROM home WHERE user = %s"
+    cursor.execute(count_query, ("John"))
+    totalData = cursor.fetchone()['total']
+    
     cursor.close()
     connection.close()
-    return render_template('data.html', recent = recent, general = general)
+    return render_template('data.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
+
+
+@app.route('/dashboardJane')
+def dashJane():
+    connection = get_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    recentquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    cursor.execute(recentquery)
+    recent = cursor.fetchall()
+    
+    if recent:
+        first_entry = recent[0]  
+        recent = first_entry
+    else:
+        recent = None  
+    
+    alertquery = "SELECT * FROM home WHERE fireDetect = 1 OR fireDetect = 1 ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    cursor.execute(alertquery)
+    alerts = cursor.fetchall()
+    
+    today = datetime.today()
+    current_year = 2024
+    current_month = 11
+    current_day = 30
+    
+    generalquery = "SELECT * FROM home WHERE year = %s AND month = %s AND day = %s ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    cursor.execute(generalquery, (current_year, current_month, current_day))
+    general = cursor.fetchall()    
+    cursor.close()
+    connection.close()
+    return render_template('indexJane.html', alerts = alerts, recent = recent, general = general)
+
+
+@app.route('/dataJane')
+def dataJane():
+    page = int(request.args.get('page', 1)) 
+    DataPerPage = 100
+    offset = (page - 1) * DataPerPage
+    
+    connection = get_db()
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+    
+    recentquery = "SELECT * FROM home ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    cursor.execute(recentquery)
+    recent = cursor.fetchall()
+    
+    if recent:
+        first_entry = recent[0]  
+        recent = first_entry
+    else:
+        recent = None
+        
+    generalquery = "SELECT * FROM home WHERE user = %s ORDER BY year DESC, month DESC, day DESC, hour DESC LIMIT %s OFFSET %s"
+    cursor.execute(generalquery, ("Jane", DataPerPage, offset))
+    general = cursor.fetchall()
+    
+    count_query = "SELECT COUNT(*) as total FROM home WHERE user = %s"
+    cursor.execute(count_query, ("Jane"))
+    totalData = cursor.fetchone()['total']
+    
+    cursor.close()
+    connection.close()
+    return render_template('dataJane.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
+
+
+@app.route('/')
+def index():
+    return redirect(url_for('dashJohn'))
+
 
 def mqtt_client():
     mqtt_client = mqtt.Client()
@@ -136,8 +215,8 @@ def mqtt_client():
     broker_address = "localhost"
     mqtt_client.connect(broker_address)
     mqtt_client.loop_forever()
-
-
+    
+    
 def flask_app():
     app.run(debug=True, host='0.0.0.0')
 
