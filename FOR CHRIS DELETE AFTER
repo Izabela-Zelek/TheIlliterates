@@ -1,0 +1,42 @@
+https://mariadb.com/kb/en/mariadb-basics/
+
+Follow these instructons. set database name as homemanager
+password as raspberrypi
+username as admin
+hostname should be the one mentioned in the doc localhost
+
+create a table called home (like below)
+CREATE TABLE `home` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` varchar(50) DEFAULT NULL,
+  `temp` float DEFAULT NULL,
+  `gasDetect` tinyint(1) DEFAULT NULL,
+  `fireDetect` tinyint(1) DEFAULT NULL,
+  `lightLevel` int(11) DEFAULT NULL,
+  `humidity` float DEFAULT NULL,
+  `pressure` float DEFAULT NULL,
+  `month` int(11) DEFAULT NULL,
+  `hour` int(11) DEFAULT NULL,
+  `day` int(11) DEFAULT NULL,
+  `year` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+
+might need to change it if it doesnt look like this table
+
++------------+-------------+------+-----+---------+----------------+
+| Field      | Type        | Null | Key | Default | Extra          |
++------------+-------------+------+-----+---------+----------------+
+| id         | int(11)     | NO   | PRI | NULL    | auto_increment |
+| user       | varchar(50) | YES  |     | NULL    |                |
+| temp       | float       | YES  |     | NULL    |                |
+| gasDetect  | tinyint(1)  | YES  |     | NULL    |                |
+| fireDetect | tinyint(1)  | YES  |     | NULL    |                |
+| lightLevel | int(11)     | YES  |     | NULL    |                |
+| humidity   | float       | YES  |     | NULL    |                |
+| pressure   | float       | YES  |     | NULL    |                |
+| month      | int(11)     | YES  |     | NULL    |                |
+| hour       | int(11)     | YES  |     | NULL    |                |
+| day        | int(11)     | YES  |     | NULL    |                |
+| year       | int(11)     | YES  |     | NULL    |                |
++------------+-------------+------+-----+---------+----------------+
