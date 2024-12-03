@@ -21,7 +21,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <!-- Top container -->
 <div class="w3-bar w3-top w3-black w3-large" style="position: relative;">
   <a href="/dashboardJohn" class="w3-bar-item w3-button w3-right">John</a>
-  <a href="/dashboardJane" class="w3-bar-item w3-button w3-right">Jane</a>
+  <a href="#" class="w3-bar-item w3-button w3-right">Jane</a>
 </div>
 
 <!-- Sidebar/menu -->
@@ -155,6 +155,40 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
                   <tr>
                     <td>
                         Light Level: {{ entry['lightLevel'] }}
+                    </td>
+                    <td> {{ entry['hour'] }}:00 - {{ entry['day'] }}/{{ entry['month'] }}/{{ entry['year'] }}</td>
+                  </tr>
+              {% endfor %}
+            </table><br>
+        </div>
+</div>
+<hr>
+
+<div class="w3-container">
+    <h5>Humidity Recorded Today</h5>
+        <div class="alerts-box">
+            <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+              {% for entry in general %}
+                  <tr>
+                    <td>
+                       Humidity: {{ entry['humidity'] }}
+                    </td>
+                    <td> {{ entry['hour'] }}:00 - {{ entry['day'] }}/{{ entry['month'] }}/{{ entry['year'] }}</td>
+                  </tr>
+              {% endfor %}
+            </table><br>
+        </div>
+</div>
+<hr>
+
+<div class="w3-container">
+    <h5>Pressure Recorded Today</h5>
+        <div class="alerts-box">
+            <table class="w3-table w3-striped w3-bordered w3-border w3-hoverable w3-white">
+              {% for entry in general %}
+                  <tr>
+                    <td>
+                        Pressure: {{ entry['pressure'] }}
                     </td>
                     <td> {{ entry['hour'] }}:00 - {{ entry['day'] }}/{{ entry['month'] }}/{{ entry['year'] }}</td>
                   </tr>

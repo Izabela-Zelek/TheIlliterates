@@ -74,7 +74,7 @@ def on_message(client, userdata, msg):
         server.quit()
         connection.close()
     
-
+    
 @app.route('/dashboardJohn')
 def dashJohn():
     connection = get_db()

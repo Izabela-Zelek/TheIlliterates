@@ -56,11 +56,11 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 
   <!-- Header -->
   <header class="w3-container" style="padding-top:22px">
-    <h5><b><i class="fa fa-dashboard"></i> Recent</b></h5>
+    <h5><b><i class="fa fa-dashboard"></i> Preferred conditions</b></h5>
   </header>
 
   <div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-quarter">
+    <div class="w3-half">
       <div class="w3-container w3-red w3-padding-16">
         <div class="w3-left"></i></div>
         <div class="w3-clear"></div>
@@ -72,23 +72,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
           </div>
       </div>
     </div>
-    <div class="w3-quarter">
-      <div class="w3-container w3-teal w3-padding-16">
-        <div class="w3-left"></i></div>
-        <div class="w3-clear"></div>
-        <h4>Gas Level</h4>
-        <div class="w3-right">
-          <h3>
-              {% if recent['gasDetect'] == 1 %}
-                  Unsafe
-              {% else %}
-                  Safe
-              {% endif %}
-          </h3>
-        </div>
-    </div>
-    </div>
-    <div class="w3-quarter">
+    <div class="w3-half">
       <div class="w3-container w3-orange w3-text-white w3-padding-16">
         <div class="w3-left"></i></div>
         <div class="w3-clear"></div>
@@ -103,6 +87,10 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   </div>
   
 <div class="w3-container">
+    <div>
+        <input type="checkbox" id="toggleData" class="w3-check" onclick="toggleDateTimeVisibility()">
+        <label for="toggleDateTime">Disallow date and time tracking</label>
+    </div>
     <h5>Preference Data Collected on John</h5>
         <div class="alerts-box">
             <table class="w3-table w3-striped w3-bordered w3-border w3-white">
@@ -111,7 +99,16 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
                     <td>
                         Temperature: {{ entry['temp'] }}
                     </td>
-                    <td> {{ entry['hour'] }}:00 - {{ entry['day'] }}/{{ entry['month'] }}/{{ entry['year'] }}</td>
+                    <td>
+                        Light Level: {{ entry['lightLevel'] }}
+                    </td>
+                    <td>
+                       Humidity: {{ entry['humidity'] }}
+                    </td>
+                    <td>
+                        Pressure: {{ entry['pressure'] }}
+                    </td>
+                    <td class="hide-data"> {{ entry['hour'] }}:00 - {{ entry['day'] }}/{{ entry['month'] }}/{{ entry['year'] }}</td>
                   </tr>
               {% endfor %}
             </table><br>
@@ -152,6 +149,16 @@ function w3_open() {
 function w3_close() {
   mySidebar.style.display = "none";
   overlayBg.style.display = "none";
+}
+
+//Simulates removing sensitive data
+function toggleDateTimeVisibility() {
+    const dateTimeCells = document.querySelectorAll('.hide-data'); // Select all cells with the "date-time" class
+    const isChecked = document.getElementById('toggleData').checked; // Check if the checkbox is checked
+
+    dateTimeCells.forEach(cell => {
+        cell.style.display = isChecked ? 'none' : ''; // Hide or show cells
+    });
 }
 </script>
 
