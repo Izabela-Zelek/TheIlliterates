@@ -11,6 +11,9 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, message="pandas only supports SQLAlchemy connectable")
 
 from_email_addr = "theilliteratespi@gmail.com"
 from_email_pass = "dlhp fcho dqnm ehds"
@@ -214,8 +217,14 @@ def index():
 
 # Integrated Machine Learning Model
 def initialize_ml_models():
-    data = pd.read_csv("fullData.csv")
-    X = data[['user', 'hour', 'month', 'gasDetect', 'fireDetect', 'day', 'year']]
+    connection = get_db()
+    
+    query = "SELECT * FROM home WHERE user = 'John' ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    data = pd.read_sql(query, connection)
+    
+    connection.close()
+    
+    X = data[['user', 'hour', 'month', 'gasDetect', 'fireDetect', 'day', 'year', 'humidity', 'pressure']]
     X = pd.get_dummies(X, columns=['user'], drop_first=True)
     y_temp = data['temp']
     y_light = data['lightLevel']
@@ -234,27 +243,16 @@ def initialize_ml_models():
 
 temp_model, light_model, X = initialize_ml_models()
 
-def handle_environment_adjustment(user, hour, month, day, year, gasDetect, fireDetect):
-    current_conditions = {
-        'user': user, 'hour': hour, 'month': month, 'day': day, 'year': year,
-        'gasDetect': gasDetect, 'fireDetect': fireDetect
-    }
-    input_data = pd.DataFrame([current_conditions])
-    input_data = pd.get_dummies(input_data, columns=['user'], drop_first=True)
+def run_predictions():
+    predicted_temp = temp_model.predict(X)
+    predicted_light = light_model.predict(X)
     
-    missing_cols = set(X.columns) - set(input_data.columns)
-    for col in missing_cols:
-        input_data[col] = 0
-    input_data = input_data[X.columns]
+    predictions = pd.DataFrame({
+        'Predicted Temperature': predicted_temp,
+        'Predicted Light Level': predicted_light
+    })
     
-    if gasDetect == 1:
-        return "Gas detected! Adjustments paused."
-    elif fireDetect == 1:
-        return "Fire detected! Adjustments paused."
-    else:
-        predicted_temp = temp_model.predict(input_data)[0]
-        predicted_light = light_model.predict(input_data)[0]
-        return f"Adjust temperature to {predicted_temp:.2f}°C and light to {predicted_light:.2f} lux."
+    return predictions
 
 def mqtt_client():
     mqtt_client = mqtt.Client()

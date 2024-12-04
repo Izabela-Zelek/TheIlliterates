@@ -7,6 +7,14 @@ from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 import threading
 import random
+from sklearn.ensemble import RandomForestRegressor
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, message="pandas only supports SQLAlchemy connectable")
 
 from_email_addr ="theilliteratespi@gmail.com"
 from_email_pass ="dlhp fcho dqnm ehds"
@@ -46,7 +54,7 @@ def on_message(client, userdata, msg):
         """
         cursor.execute(insert_query, values)
         connection.commit()
-        print(f"Inserted {cursor.rowcount} row(s) into the database.")
+        #print(f"Inserted {cursor.rowcount} row(s) into the database.")
         #print(f"Received context: {context_message}")
         cursor.close()
         connection.close()
@@ -148,7 +156,12 @@ def dataJohn():
     
     cursor.close()
     connection.close()
-    return render_template('data.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
+    
+    predTemp, predLight = run_predictions()
+    predTemp = round(predTemp,2)
+    predLight = int(predLight)
+    
+    return render_template('data.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage, predTemp = predTemp, predLight = predLight)
 
 
 @app.route('/prefJohn')
@@ -172,9 +185,11 @@ def update_pref():
     """
     cursor.execute(insert_query, values)
     connection.commit()
-    print(f"Inserted {cursor.rowcount} row(s) into the database.")
+    #print(f"Inserted {cursor.rowcount} row(s) into the database.")
     cursor.close()
     connection.close()
+    #reinitialising with extra data
+    temp_model, light_model, X = initialize_ml_models()
     return jsonify({"message": "Success!"})
 
 @app.route('/dashboardJane')
@@ -243,7 +258,12 @@ def dataJane():
     
     cursor.close()
     connection.close()
-    return render_template('dataJane.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
+    
+    predTemp, predLight = run_predictionsJane()
+    predTemp = round(predTemp,2)
+    predLight = int(predLight)
+    
+    return render_template('dataJane.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage, predTemp = predTemp, predLight = predLight)
 
 
 @app.route('/prefJane')
@@ -267,9 +287,11 @@ def update_prefJane():
     """
     cursor.execute(insert_query, values)
     connection.commit()
-    print(f"Inserted {cursor.rowcount} row(s) into the database.")
+    #print(f"Inserted {cursor.rowcount} row(s) into the database.")
     cursor.close()
     connection.close()
+    #Reinitialising with extra data
+    temp_modelJane, light_modelJane, XJane = initialize_ml_modelsJane()
     return jsonify({"message": "Success!"})
 
 
@@ -314,6 +336,100 @@ def calculate_monthly_averages(data):
             })
 
     return averages
+
+# Integrated Machine Learning Model
+def initialize_ml_models():
+    connection = get_db()
+    
+    query = "SELECT * FROM home WHERE user = 'John' ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    data = pd.read_sql(query, connection)
+    
+    connection.close()
+    
+    X = data[['user', 'hour', 'month', 'gasDetect', 'fireDetect', 'day', 'year', 'humidity', 'pressure']]
+    X = pd.get_dummies(X, columns=['user'], drop_first=True)
+    y_temp = data['temp']
+    y_light = data['lightLevel']
+
+    X_train, X_test, y_temp_train, y_temp_test, y_light_train, y_light_test = train_test_split(
+        X, y_temp, y_light, test_size=0.2, random_state=42
+    )
+
+    temp_model = RandomForestRegressor(random_state=42)
+    light_model = RandomForestRegressor(random_state=42)
+
+    temp_model.fit(X_train, y_temp_train)
+    light_model.fit(X_train, y_light_train)
+
+    return temp_model, light_model, X
+
+temp_model, light_model, X = initialize_ml_models()
+
+def run_predictions():
+    time = datetime.now()
+    current_conditions = {
+        'user': "John", 'hour': time.hour, 'month': time.month, 'day': time.day, 'year': time.year,
+        'gasDetect': 0, 'fireDetect': 0, 'humidity': 45, 'pressure': 100
+    }
+    input_data = pd.DataFrame([current_conditions])
+    input_data = pd.get_dummies(input_data, columns=['user'], drop_first=True)
+    
+    missing_cols = set(X.columns) - set(input_data.columns)
+    for col in missing_cols:
+        input_data[col] = 0
+    input_data = input_data[X.columns]
+    
+    predicted_temp = temp_model.predict(input_data)[0]
+    predicted_light = light_model.predict(input_data)[0]
+
+    return predicted_temp, predicted_light
+
+# Integrated Machine Learning Model
+def initialize_ml_modelsJane():
+    connection = get_db()
+    
+    query = "SELECT * FROM home WHERE user = 'Jane' ORDER BY year DESC, month DESC, day DESC, hour DESC"
+    data = pd.read_sql(query, connection)
+    
+    connection.close()
+    
+    X = data[['user', 'hour', 'month', 'gasDetect', 'fireDetect', 'day', 'year', 'humidity', 'pressure']]
+    X = pd.get_dummies(X, columns=['user'], drop_first=True)
+    y_temp = data['temp']
+    y_light = data['lightLevel']
+
+    X_train, X_test, y_temp_train, y_temp_test, y_light_train, y_light_test = train_test_split(
+        X, y_temp, y_light, test_size=0.2, random_state=42
+    )
+
+    temp_model = RandomForestRegressor(random_state=42)
+    light_model = RandomForestRegressor(random_state=42)
+
+    temp_model.fit(X_train, y_temp_train)
+    light_model.fit(X_train, y_light_train)
+
+    return temp_model, light_model, X
+
+temp_modelJane, light_modelJane, XJane = initialize_ml_modelsJane()
+
+def run_predictionsJane():
+    time = datetime.now()
+    current_conditions = {
+        'user': "Jane", 'hour': time.hour, 'month': time.month, 'day': time.day, 'year': time.year,
+        'gasDetect': 0, 'fireDetect': 0, 'humidity': 45, 'pressure': 100
+    }
+    input_data = pd.DataFrame([current_conditions])
+    input_data = pd.get_dummies(input_data, columns=['user'], drop_first=True)
+    
+    missing_cols = set(XJane.columns) - set(input_data.columns)
+    for col in missing_cols:
+        input_data[col] = 0
+    input_data = input_data[XJane.columns]
+    
+    predicted_temp = temp_modelJane.predict(input_data)[0]
+    predicted_light = light_modelJane.predict(input_data)[0]
+
+    return predicted_temp, predicted_light
 
 
 def mqtt_client():
