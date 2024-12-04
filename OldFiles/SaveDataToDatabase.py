@@ -39,6 +39,6 @@ import_csv_to_table(
     user="admin",
     password="raspberrypi",
     database="homemanager",
-    table_name="test",
+    table_name="home",
     input_file="AllDatabaseData.csv"
 )

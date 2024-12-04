@@ -11,9 +11,9 @@ from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
 import warnings
 
+#Stopping warning because pandas does not like pymysql, however it doesn't stop functionality
 warnings.filterwarnings("ignore", category=UserWarning, message="pandas only supports SQLAlchemy connectable")
 
 from_email_addr ="theilliteratespi@gmail.com"
@@ -178,7 +178,7 @@ def update_pref():
     time = datetime.now()
     connection = get_db()
     cursor = connection.cursor()
-    values = ("John", temp, 0, 0, lightLevel, random.uniform(45,70), random.uniform(980,1020), time.month, time.hour, time.day, time.year)
+    values = ("John", temp, 0, 0, lightLevel, random.randint(45,70), random.randint(980,1020), time.month, time.hour, time.day, time.year)
     insert_query = """
     INSERT INTO home (user, temp, gasDetect, fireDetect, lightLevel, humidity, pressure, month, hour, day, year) 
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -191,6 +191,7 @@ def update_pref():
     #reinitialising with extra data
     temp_model, light_model, X = initialize_ml_models()
     return jsonify({"message": "Success!"})
+
 
 @app.route('/dashboardJane')
 def dashJane():
@@ -280,7 +281,7 @@ def update_prefJane():
     time = datetime.now()
     connection = get_db()
     cursor = connection.cursor()
-    values = ("Jane", temp, 0, 0, lightLevel, random.uniform(45,70), random.uniform(980,1020), time.month, time.hour, time.day, time.year)
+    values = ("Jane", temp, 0, 0, lightLevel, random.randint(45,70), random.randint(980,1020), time.month, time.hour, time.day, time.year)
     insert_query = """
     INSERT INTO home (user, temp, gasDetect, fireDetect, lightLevel, humidity, pressure, month, hour, day, year) 
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
