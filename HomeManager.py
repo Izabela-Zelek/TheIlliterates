@@ -4,8 +4,9 @@ import json
 import smtplib
 from email.message import EmailMessage
 from datetime import datetime
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 import threading
+import random
 
 from_email_addr ="theilliteratespi@gmail.com"
 from_email_pass ="dlhp fcho dqnm ehds"
@@ -150,6 +151,32 @@ def dataJohn():
     return render_template('data.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
 
 
+@app.route('/prefJohn')
+def prefJohn():
+    return render_template('pref.html')
+
+
+#Gets data from sliders on John webapp
+@app.route('/add-pref', methods=['POST'])
+def update_pref():
+    data = request.json
+    temp = data.get('temperature')
+    lightLevel = data.get('light')
+    time = datetime.now()
+    connection = get_db()
+    cursor = connection.cursor()
+    values = ("John", temp, 0, 0, lightLevel, random.uniform(45,70), random.uniform(980,1020), time.month, time.hour, time.day, time.year)
+    insert_query = """
+    INSERT INTO home (user, temp, gasDetect, fireDetect, lightLevel, humidity, pressure, month, hour, day, year) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(insert_query, values)
+    connection.commit()
+    print(f"Inserted {cursor.rowcount} row(s) into the database.")
+    cursor.close()
+    connection.close()
+    return jsonify({"message": "Success!"})
+
 @app.route('/dashboardJane')
 def dashJane():
     connection = get_db()
@@ -217,6 +244,33 @@ def dataJane():
     cursor.close()
     connection.close()
     return render_template('dataJane.html', recent = recent, general = general, page=page, total_pages=(totalData + DataPerPage - 1) // DataPerPage)
+
+
+@app.route('/prefJane')
+def prefJane():
+    return render_template('prefJane.html')
+
+
+#Gets data from sliders on Jane webapp
+@app.route('/add-prefJane', methods=['POST'])
+def update_prefJane():
+    data = request.json
+    temp = data.get('temperature')
+    lightLevel = data.get('light')
+    time = datetime.now()
+    connection = get_db()
+    cursor = connection.cursor()
+    values = ("Jane", temp, 0, 0, lightLevel, random.uniform(45,70), random.uniform(980,1020), time.month, time.hour, time.day, time.year)
+    insert_query = """
+    INSERT INTO home (user, temp, gasDetect, fireDetect, lightLevel, humidity, pressure, month, hour, day, year) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(insert_query, values)
+    connection.commit()
+    print(f"Inserted {cursor.rowcount} row(s) into the database.")
+    cursor.close()
+    connection.close()
+    return jsonify({"message": "Success!"})
 
 
 @app.route('/')
